@@ -133,22 +133,21 @@
         }
     }
 
-    async function verifyRewardCode() {
-        const providedCode = document.getElementById('codeInput').value.trim();
-        
-        if (!providedCode) {
-            alert("Please enter a code first!");
-            return;
-        }
+   async function verifyRewardCode() {
+    const providedCode = document.getElementById('codeInput').value.trim();
 
-        // SHA-256 Hash algorithm matching YAGPDB hash "sha256"
-        const sourceString = userDiscordId + SECRET_KEY;
-        const encoder = new TextEncoder();
-        const data = encoder.encode(sourceString);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        
-      const hashBytes = new Uint8Array(hashBuffer);
-      let binary = '';
+    if (!providedCode) {
+        alert("Please enter a code first!");
+        return;
+    }
+
+    const sourceString = userDiscordId + SECRET_KEY;
+    const encoder = new TextEncoder();
+    const data = encoder.encode(sourceString);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+
+    const hashBytes = new Uint8Array(hashBuffer);
+    let binary = '';
 
     for (const byte of hashBytes) {
         binary += String.fromCharCode(byte);
@@ -156,18 +155,20 @@
 
     const expectedCode = btoa(binary);
 
-console.log("Website Discord ID:", userDiscordId);
-console.log("Hash source:", sourceString);
-console.log("Expected code:", expectedCode);
-console.log("Provided code:", providedCode);
+    console.log("Discord ID:", userDiscordId);
+    console.log("Expected:", expectedCode);
+    console.log("Provided:", providedCode);
+    console.log("Expected length:", expectedCode.length);
+    console.log("Provided length:", providedCode.length);
+    console.log("Exact match:", providedCode === expectedCode);
 
-        if (providedCode === expectedCode) {
-            alert("🎉 Success! Reward code verified. Enjoy your perks!");
-            // ---> Add your game unlock function here <---
-        } else {
-            alert("❌ Invalid code! This reward code does not match your Discord account.");
-        }
+    if (providedCode === expectedCode) {
+        alert("🎉 Success! Reward code verified. Enjoy your perks!");
+        // ---> Add your game unlock function here <---
+    } else {
+        alert("❌ Invalid code! This reward code does not match your Discord account.");
     }
+}
 </script>
 
 </body>
