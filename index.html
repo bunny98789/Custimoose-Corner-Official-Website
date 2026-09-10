@@ -44,7 +44,7 @@
         
         .form-group {
             margin-top: 20px;
-            display: none; /* Hidden until user logs in */
+            display: none;
             text-align: left;
         }
         label { display: block; margin-bottom: 8px; color: #b9bbbe; font-size: 12px; text-transform: uppercase; font-weight: bold; }
@@ -80,10 +80,8 @@
     <h1>Custimoose Corner 🦌</h1>
     <p>Unlock your exclusive in-game rewards by verifying your community status!</p>
 
-    <!-- STEP 1: Discord Login Button -->
     <button id="loginBtn" class="btn-discord" onclick="loginWithDiscord()">🔗 Log In with Discord</button>
 
-    <!-- STEP 2: Code Submission Form (Hidden until logged in) -->
     <div id="rewardForm" class="form-group">
         <div id="welcomeMessage" class="user-info"></div>
         
@@ -95,40 +93,37 @@
 </div>
 
 <script>
-    // ⚙️ CONFIGURATION - REPLACE THESE VALUES WITH YOUR OWN
-    const CLIENT_ID = '1547063276666621952; // Get this from Discord Dev Portal
-    const REDIRECT_URI = window.location.href.split('#')[0]; // Automatically uses current page URL
-    const SECRET_KEY = 'MooseMakers2026'; // Must match your YAGPDB secret key exactly
+    // ⚙️ CONFIGURATION
+    const CLIENT_ID = '1547063276666621952'; // Fixed missing quote
+    const REDIRECT_URI = window.location.href.split('#')[0]; 
+    const SECRET_KEY = 'MooseMakers2026';
     
-    let userDiscordId = ""; // Will be populated automatically upon successful login
+    let userDiscordId = ""; 
 
-    // Redirect the player to Discord's official OAuth2 Authorization screen
     function loginWithDiscord() {
-        window.location.href = `https://discord.com{CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
+        // Complete Discord OAuth2 URL
+        window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
     }
 
-    // Runs automatically when the script loads to check if Discord redirected the user back with a token
     window.onload = function() {
         const fragment = new URLSearchParams(window.location.hash.slice(1));
         const accessToken = fragment.get('access_token');
 
         if (accessToken) {
-            // Hide the login button and fetch user details from Discord API
             document.getElementById('loginBtn').style.display = 'none';
             
-            fetch('https://discord.com', {
+            // Complete Discord API User Endpoint
+            fetch('https://discord.com/api/v10/users/@me', {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
             })
             .then(response => response.json())
             .then(data => {
                 if (data.id) {
-                    userDiscordId = data.id; // Store the official Discord ID securely
+                    userDiscordId = data.id;
                     
-                    // Show the hidden form and greet the player
-                    document.getElementById('welcomeMessage').innerText = `Logged in as: ${data.username}#${data.discriminator || '0000'}`;
+                    document.getElementById('welcomeMessage').innerText = `Logged in as: ${data.username}`;
                     document.getElementById('rewardForm').style.display = 'block';
                     
-                    // Clean up the URL token from the browser bar for neatness
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
             })
@@ -140,7 +135,6 @@
         }
     }
 
-    // Handles the math calculations to see if the user's generated code matches their ID
     function verifyRewardCode() {
         const providedCode = document.getElementById('codeInput').value.trim();
         
@@ -149,15 +143,12 @@
             return;
         }
 
-        // Mathematical Hash generation formula (Base64 Scramble)
+        // Base64 encoding matching the YAGPDB output
         const expectedCode = btoa(userDiscordId + SECRET_KEY);
 
         if (providedCode === expectedCode) {
             alert("🎉 Success! Reward code verified. Enjoy your perks!");
-            
-            // ---> CALL YOUR INDIE GAME REWARD FUNCTION HERE <---
-            // example: unlockSecretCharacter();
-            
+            // Add your game unlock function here
         } else {
             alert("❌ Invalid code! This reward code does not match your Discord account.");
         }
