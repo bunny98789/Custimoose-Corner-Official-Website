@@ -147,8 +147,14 @@
         const data = encoder.encode(sourceString);
         const hashBuffer = await crypto.subtle.digest('SHA-256', data);
         
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const expectedCode = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      const hashBytes = new Uint8Array(hashBuffer);
+      let binary = '';
+
+    for (const byte of hashBytes) {
+        binary += String.fromCharCode(byte);
+    }
+
+    const expectedCode = btoa(binary);
 
         if (providedCode === expectedCode) {
             alert("🎉 Success! Reward code verified. Enjoy your perks!");
