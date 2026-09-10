@@ -86,7 +86,7 @@
         <div id="welcomeMessage" class="user-info"></div>
         
         <label for="codeInput">Enter your YAGPDB Reward Code:</label>
-        <input type="text" id="codeInput" placeholder="Paste scrambled code here">
+        <input type="text" id="codeInput" placeholder="Paste hashed code here">
         
         <button class="btn-verify" onclick="verifyRewardCode()">🔓 Unlock Reward</button>
     </div>
@@ -94,14 +94,13 @@
 
 <script>
     // ⚙️ CONFIGURATION
-    const CLIENT_ID = '1547063276666621952'; // Fixed missing quote
+    const CLIENT_ID = '1547063276666621952'; 
     const REDIRECT_URI = window.location.href.split('#')[0]; 
     const SECRET_KEY = 'MooseMakers2026';
     
     let userDiscordId = ""; 
 
     function loginWithDiscord() {
-        // Complete Discord OAuth2 URL
         window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
     }
 
@@ -112,7 +111,6 @@
         if (accessToken) {
             document.getElementById('loginBtn').style.display = 'none';
             
-            // Complete Discord API User Endpoint
             fetch('https://discord.com/api/v10/users/@me', {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
             })
@@ -135,20 +133,26 @@
         }
     }
 
-    function verifyRewardCode() {
-        const providedCode = document.getElementById('codeInput').value.trim();
+    async function verifyRewardCode() {
+        const providedCode = document.getElementById('codeInput').value.trim().toLowerCase();
         
         if (!providedCode) {
             alert("Please enter a code first!");
             return;
         }
 
-        // Base64 encoding matching the YAGPDB output
-        const expectedCode = btoa(userDiscordId + SECRET_KEY);
+        // SHA-256 Hash algorithm matching YAGPDB hash "sha256"
+        const sourceString = userDiscordId + SECRET_KEY;
+        const encoder = new TextEncoder();
+        const data = encoder.encode(sourceString);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const expectedCode = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
         if (providedCode === expectedCode) {
             alert("🎉 Success! Reward code verified. Enjoy your perks!");
-            // Add your game unlock function here
+            // ---> Add your game unlock function here <---
         } else {
             alert("❌ Invalid code! This reward code does not match your Discord account.");
         }
