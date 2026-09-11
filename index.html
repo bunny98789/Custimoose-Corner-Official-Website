@@ -306,7 +306,9 @@
 
 
         const expectedCode =
-            btoa(binary);
+            btoa(binary)
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_');
 
 
         // Debug information
